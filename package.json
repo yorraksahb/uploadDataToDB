@@ -1,0 +1,14 @@
+{
+    "name": "updateenricherdb",
+    "version": "1.0.0",
+    "description": "",
+    "main": "handler.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "author": "305017376",
+    "license": "GE",
+    "dependencies": {
+        "aws-sdk": "^2.20.0"
+    }
+}
