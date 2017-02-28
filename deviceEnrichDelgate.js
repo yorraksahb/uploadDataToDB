@@ -28,6 +28,7 @@ var envEnum = {
                     return dbHelper.cleanEnricherDb(tableName)
                         .then(function(data) {
                             console.log('cleanEnricherDb: ', data);
+
                             return dbHelper.createEnricherDb(tableName)
                                 .then(function(data) {
                                     console.log('createEnricherDb: ', data);
@@ -35,7 +36,10 @@ var envEnum = {
                                 });
                         });
                 } else {
-                    return dbHelper.createRecords(tableName);
+                    return dbHelper.createEnricherDb(tableName)
+                        .then(function(data) {
+                            return dbHelper.createRecords(tableName);
+                        })
                 }
             }).catch(function(err) {
                 return cb({ message: 'Error : ' + JSON.stringify(err) }); //Return the error to the console

@@ -45,12 +45,20 @@ var AWS = require('aws-sdk'),
         return docClient.scan(params).promise();
     },
 
-    cleanEnricherDb = function(tableName, data) {
+    cleanEnricherDb = function(tableName) {
         var dynamoDb = new AWS.DynamoDB();
         var params = {
             TableName: tableName
         };
         return dynamoDb.deleteTable(params).promise();
+    },
+
+    getDbTableStatus = function(tableName) {
+        var dynamoDb = new AWS.DynamoDB();
+        var params = {
+            TableName: tableName
+        };
+        return dynamoDb.describeTable(params).promise();
     },
 
     createEnricherDb = function(tableName) {
@@ -77,5 +85,6 @@ module.exports = {
     populateTableData: populateTableData,
     getEnricherMapping: getEnricherMapping,
     cleanEnricherDb: cleanEnricherDb,
+    getDbTableStatus: getDbTableStatus,
     createEnricherDb: createEnricherDb
 };
