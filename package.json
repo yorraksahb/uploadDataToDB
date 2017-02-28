@@ -9,6 +9,7 @@
     "author": "305017376",
     "license": "GE",
     "dependencies": {
-        "aws-sdk": "^2.20.0"
+        "aws-sdk": "^2.20.0",
+        "bluebird": "^3.4.7"
     }
 }

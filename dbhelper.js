@@ -1,27 +1,11 @@
-var AWS = require('aws-sdk');
-var fs = require('fs');
+'use strict';
 
-var envEnum = {
-    DEV: 'development',
-    TEST: 'test',
-    PROD: 'production'
-};
+var AWS = require('aws-sdk'),
+    fs = require('fs'),
+    Promise = require('bluebird'),
+    docClient = new AWS.DynamoDB.DocumentClient();
 
-function executeDbOps(environment) {
-
-    var tableName;
-    if (environment === envEnum.DEV) {
-        tableName = process.env.development;
-    } else if (environment === envEnum.DEV) {
-        tableName = process.env.envEnum.TEST;
-    } else if (environment === envEnum.PROD) {
-        tableName = process.env.envEnum.PROD;
-    } else {
-        return ('Environment Variables not defined');
-    }
-
-    var docClient = new AWS.DynamoDB.DocumentClient();
-
+createRecords = function(tableName) {
     console.log("Importing device enricher into DynamoDB. Please wait.");
 
     var allData = JSON.parse(fs.readFileSync('data/enricher_dev.json', 'utf8'));
@@ -50,4 +34,22 @@ function executeDbOps(environment) {
     })
 }
 
-exports.executeDbOps = executeDbOps;
+checkTable = function(tableName) {
+    var params = {
+        TableName: tableName
+    }
+
+    docClient.scan(params, function(err, data) {
+        if (err) {
+
+        } else {
+
+        }
+    });
+}
+
+
+module.exports = {
+    createRecords: createRecords,
+    checkTable: checkTable
+};
