@@ -4,6 +4,25 @@ var AWS = require('aws-sdk'),
     fs = require('fs'),
     Promise = require('bluebird'),
     docClient = new AWS.DynamoDB.DocumentClient(),
+    dynamoDb = new AWS.DynamoDB(),
+
+    describeTableStatus = function(tableName) {
+        var params = {
+            TableName: tableName
+        };
+
+        return new Promise(function(resolve, reject){
+            dynamoDb.describeTable(params, function(err, data){
+                if(err) {
+                    reject(false);
+                }
+                else {
+                    resolve(true);
+                }
+            });
+        });
+        
+    }
 
     createRecords = function(tableName) {
         console.log("Importing device enricher into DynamoDB. Please wait.");
@@ -46,15 +65,17 @@ var AWS = require('aws-sdk'),
     },
 
     cleanEnricherDb = function(tableName) {
-        var dynamoDb = new AWS.DynamoDB();
         var params = {
             TableName: tableName
         };
-        return dynamoDb.deleteTable(params).promise();
+        dynamoDb.deleteTable(params, function(err, data){
+            if(data) {
+                return waitForTableDelete(tableName).promise();
+            }
+        });
     },
 
     getDbTableStatus = function(tableName) {
-        var dynamoDb = new AWS.DynamoDB();
         var params = {
             TableName: tableName
         };
@@ -62,7 +83,6 @@ var AWS = require('aws-sdk'),
     },
 
     createEnricherDb = function(tableName) {
-        var dynamoDb = new AWS.DynamoDB();
         var params = {
             TableName: tableName,
             KeySchema: [
@@ -78,13 +98,22 @@ var AWS = require('aws-sdk'),
         };
 
         return dynamoDb.createTable(params).promise();
+    },
+    
+    waitForTableDelete = function(tableName) {
+        var params = {
+            TableName: tableName
+        };
+    return dynamoDb.waitFor('tableNotExists',params).promise();
     };
 
 module.exports = {
+    describeTableStatus: describeTableStatus,
     createRecords: createRecords,
     populateTableData: populateTableData,
     getEnricherMapping: getEnricherMapping,
     cleanEnricherDb: cleanEnricherDb,
     getDbTableStatus: getDbTableStatus,
-    createEnricherDb: createEnricherDb
+    createEnricherDb: createEnricherDb,
+    waitForTableDelete: waitForTableDelete
 };
