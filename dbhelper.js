@@ -68,12 +68,7 @@ var AWS = require('aws-sdk'),
         var params = {
             TableName: tableName
         };
-        dynamoDb.deleteTable(params, function(err, data) {
-            if (data) {
-                console.log('deleting table ' + JSON.stringify(data));
-                return waitForTableDelete(tableName);
-            }
-        });
+        return dynamoDb.deleteTable(params).promise();
     },
 
     getDbTableStatus = function(tableName) {
@@ -97,12 +92,7 @@ var AWS = require('aws-sdk'),
                 WriteCapacityUnits: 5
             }
         };
-        dynamoDb.createTable(params, function(err, data) {
-            if (data) {
-                console.log('creating table ' + JSON.stringify(data));
-                return waitForTableCreate(tableName);
-            }
-        });
+        return dynamoDb.createTable(params).promise();
     },
 
     waitForTableDelete = function(tableName) {

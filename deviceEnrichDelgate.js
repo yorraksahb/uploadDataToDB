@@ -13,10 +13,18 @@ var dbHelper = require('./dbhelper.js'),
                                 return dbHelper.cleanEnricherDb(tableName)
                                     .then(function(data) {
                                         console.log('cleanEnricherDb: ', data);
-                                        return dbHelper.createEnricherDb(tableName)
-                                            .then(function(data) {
-                                                console.log('createEnricherDb: ', data);
-                                                return dbHelper.createRecords(tableName);
+                                        return dbHelper.waitForTableDelete(tableName)
+                                            .then(function(data){
+                                                console.log('waitForTableDelete: ', data);
+                                                return dbHelper.createEnricherDb(tableName)
+                                                    .then(function(data){
+                                                        console.log('createEnricherDb: ', data);
+                                                        return dbHelper.waitForTableCreate(tableName)
+                                                            .then(function(data){
+                                                                console.log('createEnricherDb: ', data);
+                                                                return dbHelper.createRecords(tableName);
+                                                            });
+                                                    });
                                             });
                                     });
                             } else {
@@ -29,8 +37,12 @@ var dbHelper = require('./dbhelper.js'),
                     return dbHelper.createEnricherDb(tableName)
                         .then(function(data) {
                             console.log('Table Not Exists Creating ' + data);
-                            return dbHelper.createRecords(tableName);
-                        })
+                            return dbHelper.waitForTableCreate(tableName)
+                                .then(function(data){
+                                    console.log('Creating records now '+ data);
+                                    return dbHelper.createRecords(tableName);  
+                                });
+                        });
                 }
             }).catch(function(err) {
                 return cb({ message: 'Error : ' + JSON.stringify(err) }); //Return the error to the console
