@@ -11,21 +11,20 @@ var AWS = require('aws-sdk'),
             TableName: tableName
         };
 
-        return new Promise(function(resolve, reject){
-            dynamoDb.describeTable(params, function(err, data){
-                if(err) {
-                    reject(false);
-                }
-                else {
+        return new Promise(function(resolve, reject) {
+            dynamoDb.describeTable(params, function(err, data) {
+                if (err) {
+                    resolve(false);
+                } else {
                     resolve(true);
                 }
             });
         });
-        
-    }
+
+    },
 
     createRecords = function(tableName) {
-        console.log("Importing device enricher into DynamoDB. Please wait.");
+        console.log("Importing device enricher into DynamoDB. Please wait." + tableName);
 
         return new Promise(function(resolve, reject) {
             var allData = JSON.parse(fs.readFileSync('data/enricher_dev.json', 'utf8'));
@@ -41,7 +40,8 @@ var AWS = require('aws-sdk'),
         });
     },
 
-    populateTableData = function(enricher, table) {
+    populateTableData = function(enricher, tableName) {
+        console.log('populateTableData ' + tableName);
         var params = {
             TableName: tableName,
             Item: {
@@ -68,9 +68,10 @@ var AWS = require('aws-sdk'),
         var params = {
             TableName: tableName
         };
-        dynamoDb.deleteTable(params, function(err, data){
-            if(data) {
-                return waitForTableDelete(tableName).promise();
+        dynamoDb.deleteTable(params, function(err, data) {
+            if (data) {
+                console.log('deleting table ' + JSON.stringify(data));
+                return waitForTableDelete(tableName);
             }
         });
     },
@@ -96,15 +97,26 @@ var AWS = require('aws-sdk'),
                 WriteCapacityUnits: 5
             }
         };
-
-        return dynamoDb.createTable(params).promise();
+        dynamoDb.createTable(params, function(err, data) {
+            if (data) {
+                console.log('creating table ' + JSON.stringify(data));
+                return waitForTableCreate(tableName);
+            }
+        });
     },
-    
+
     waitForTableDelete = function(tableName) {
         var params = {
             TableName: tableName
         };
-    return dynamoDb.waitFor('tableNotExists',params).promise();
+        return dynamoDb.waitFor('tableNotExists', params).promise();
+    },
+
+    waitForTableCreate = function(tableName) {
+        var params = {
+            TableName: tableName
+        };
+        return dynamoDb.waitFor('tableExists', params).promise();
     };
 
 module.exports = {
@@ -115,5 +127,6 @@ module.exports = {
     cleanEnricherDb: cleanEnricherDb,
     getDbTableStatus: getDbTableStatus,
     createEnricherDb: createEnricherDb,
-    waitForTableDelete: waitForTableDelete
+    waitForTableDelete: waitForTableDelete,
+    waitForTableCreate: waitForTableCreate
 };
