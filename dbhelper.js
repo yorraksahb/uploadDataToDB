@@ -27,7 +27,7 @@ var AWS = require('aws-sdk'),
         console.log("Importing device enricher into DynamoDB. Please wait." + tableName);
 
         return new Promise(function(resolve, reject) {
-            var allData = JSON.parse(fs.readFileSync('data/enricher_dev.json', 'utf8'));
+            var allData = JSON.parse(fs.readFileSync('data/enricher.json', 'utf8'));
             Promise.each(allData.deviceEnricher, function(enricher) {
                     return populateTableData(enricher, tableName);
                 })
